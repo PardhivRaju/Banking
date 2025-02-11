@@ -3,115 +3,166 @@ package Banking;
 import java.util.Scanner;
 
 public class BankSystem {
-    private static Bank bank = new Bank();
+    static Database database = new Database();
+    private static Admin admin = new Admin();
+    private static User currentUser;
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n-- Bank Management System --");
-            if (!Login.isLoggedIn) {
-                System.out.println("1. Login");
-                System.out.println("2. Sign Up");
-                System.out.print("Choose an option: ");
-                int option = scanner.nextInt();
+            System.out.println("Welcome to Bank System");
+            System.out.println("1. Login as User");
+            System.out.println("2. Login as Admin");
+            System.out.println("3. Sign Up");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
 
-                switch (option) {
-                    case 1:
-                        Login.login(scanner);
-                        break;
-                    case 2:
-                        Signup.signup(scanner);
-                        break;
-                    default:
-                        System.out.println("Invalid option. Try again.");
-                }
-            } else {
-                System.out.println("1. Create Account (Admin Only)");
-                System.out.println("2. Deposit");
-                System.out.println("3. Withdraw");
-                System.out.println("4. Display Account Info");
-                System.out.println("5. Display All Accounts (Admin Only)");
-                System.out.println("6. Exit");
-                System.out.print("Choose an option: ");
-                int option = scanner.nextInt();
-
-                switch (option) {
-                    case 1:
-                        if (Login.isLoggedIn) {
-                            System.out.print("Enter Account Number: ");
-                            String accountNumber = scanner.next();
-                            System.out.print("Enter Account Holder Name: ");
-                            String holderName = scanner.next();
-                            System.out.print("Enter Initial Deposit: ");
-                            double initialDeposit = scanner.nextDouble();
-                            Account account = new Account(accountNumber, holderName, initialDeposit);
-                            bank.addAccount(account);
-                            System.out.println("Account created successfully!");
-                        } else {
-                            System.out.println("Only admin can create accounts.");
-                        }
-                        break;
-                    case 2:
-                        deposit(scanner);
-                        break;
-                    case 3:
-                        withdraw(scanner);
-                        break;
-                    case 4:
-                        displayAccountInfo(scanner);
-                        break;
-                    case 5:
-                        bank.displayAllAccounts();
-                        break;
-                    case 6:
-                        System.out.println("Exiting...");
-                        return;
-                    default:
-                        System.out.println("Invalid option. Try again.");
-                }
+            switch (choice) {
+                case 1:
+                    loginAsUser(scanner);
+                    break;
+                case 2:
+                    loginAsAdmin(scanner);
+                    break;
+                case 3:
+                    signup(scanner);
+                    break;
+                case 4:
+                    System.out.println("Thank you for using Bank System.");
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
             }
         }
     }
 
-    private static void deposit(Scanner scanner) {
-        System.out.print("Enter Account Number: ");
-        String accountNumber = scanner.next();
-        Account account = bank.getAccount(accountNumber);
+    // Admin login method
+    private static void loginAsAdmin(Scanner scanner) {
+        System.out.print("Enter Admin Username: ");
+        String adminUsername = scanner.next();
+        System.out.print("Enter Admin Password: ");
+        String adminPassword = scanner.next();
 
-        if (account != null) {
-            System.out.print("Enter Deposit Amount: ");
-            double amount = scanner.nextDouble();
-            account.deposit(amount);
+        if (admin.login(adminUsername, adminPassword)) {
+            System.out.println("Admin logged in successfully!");
+            showAdminOptions(scanner);
         } else {
-            System.out.println("Account not found.");
+            System.out.println("Invalid Admin credentials.");
         }
     }
 
-    private static void withdraw(Scanner scanner) {
-        System.out.print("Enter Account Number: ");
-        String accountNumber = scanner.next();
-        Account account = bank.getAccount(accountNumber);
+    // Admin options after login
+    private static void showAdminOptions(Scanner scanner) {
+        while (true) {
+            System.out.println("Admin Options:");
+            System.out.println("1. View All Account Info");
+            System.out.println("2. Logout");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
 
-        if (account != null) {
-            System.out.print("Enter Withdrawal Amount: ");
-            double amount = scanner.nextDouble();
-            account.withdraw(amount);
-        } else {
-            System.out.println("Account not found.");
+            switch (choice) {
+                case 1:
+                    admin.viewAllAccounts(database);
+                    break;
+                case 2:
+                    System.out.println("Admin logged out.");
+                    return; // Exit the admin menu and go back to main
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
         }
     }
 
-    private static void displayAccountInfo(Scanner scanner) {
-        System.out.print("Enter Account Number: ");
-        String accountNumber = scanner.next();
-        Account account = bank.getAccount(accountNumber);
+    // User login method
+    private static void loginAsUser(Scanner scanner) {
+        System.out.print("Enter Phone Number: ");
+        String phoneNumber = scanner.next();
+        Account account = database.getAccountByPhoneNumber(phoneNumber);
 
         if (account != null) {
-            account.displayAccountInfo();
+            System.out.print("Enter Username: ");
+            String username = scanner.next();
+            System.out.print("Enter Password: ");
+            String password = scanner.next();
+
+            if (account.getUsername().equals(username) && account.getPassword().equals(password)) {
+                currentUser = new User(account);
+                System.out.println("Login successful!");
+                userOperations(scanner);
+            } else {
+                System.out.println("Invalid username or password.");
+            }
         } else {
-            System.out.println("Account not found.");
+            System.out.println("Account not found. Please sign up first.");
         }
+    }
+
+    // User operations after login
+    private static void userOperations(Scanner scanner) {
+        while (true) {
+            System.out.println("User Options:");
+            System.out.println("1. Deposit");
+            System.out.println("2. Withdraw");
+            System.out.println("3. View Account Info");
+            System.out.println("4. Logout");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter deposit amount: ");
+                    double depositAmount = scanner.nextDouble();
+                    currentUser.deposit(depositAmount); // This will call deposit on Account object
+                    break;
+                case 2:
+                    System.out.print("Enter withdrawal amount: ");
+                    double withdrawAmount = scanner.nextDouble();
+                    currentUser.withdraw(withdrawAmount); // This will call withdraw on Account object
+                    break;
+                case 3:
+                    currentUser.viewAccountInfo(); // This will call viewAccountInfo on Account object
+                    break;
+                case 4:
+                    System.out.println("Logged out successfully.");
+                    return;
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+
+    // Signup method
+    private static void signup(Scanner scanner) {
+        System.out.print("Enter Phone Number: ");
+        String phoneNumber = scanner.next();
+
+        // Check if phone number is already registered
+        if (database.getAccountByPhoneNumber(phoneNumber) != null) {
+            System.out.println("Phone number already registered. Please log in.");
+            return;
+        }
+
+        System.out.print("Enter Account Number: ");
+        String accountNumber = scanner.next();
+        System.out.print("Enter Account Holder Name: ");
+        String holderName = scanner.next();
+        System.out.print("Enter Initial Deposit: ");
+        double initialDeposit = scanner.nextDouble();
+
+        // Collect username and password for login
+        System.out.print("Create Username: ");
+        String username = scanner.next();
+        System.out.print("Create Password: ");
+        String password = scanner.next();
+
+        // Create the Account object with all 6 required fields
+        Account account = new Account(accountNumber, holderName, initialDeposit, username, password, phoneNumber);
+
+        // Add the new account to the database
+        database.addAccount(account);
+        System.out.println("Account created successfully! You can now log in.");
     }
 }
-

@@ -2,63 +2,50 @@ package Banking;
 
 public class Account {
     private String accountNumber;
-    private String accountHolderName;
+    private String holderName;
     private double balance;
     private String username;
     private String password;
+    private String phoneNumber;
 
-    public Account(String accountNumber, String accountHolderName, double balance) {
+    public Account(String accountNumber, String holderName, double balance, String username, String password, String phoneNumber) {
         this.accountNumber = accountNumber;
-        this.accountHolderName = accountHolderName;
+        this.holderName = holderName;
         this.balance = balance;
+        this.username = username;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
     }
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
-
-    public String getAccountHolderName() {
-        return accountHolderName;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
+    // Getter and Setter methods
+    public String getAccountNumber() { return accountNumber; }
+    public String getHolderName() { return holderName; }
+    public double getBalance() { return balance; }
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public String getPhoneNumber() { return phoneNumber; }
 
     public void deposit(double amount) {
-        balance += amount;
-        System.out.println("Deposited " + amount + ". New balance: " + balance);
-    }
-
-    public void withdraw(double amount) {
-        if (balance >= amount) {
-            balance -= amount;
-            System.out.println("Withdrew " + amount + ". New balance: " + balance);
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Deposit Successful! New balance: " + balance);
         } else {
-            System.out.println("Insufficient funds.");
+            System.out.println("Deposit amount must be greater than zero.");
         }
     }
 
-    public void displayAccountInfo() {
+    public void withdraw(double amount) {
+        if (amount > 0 && balance >= amount) {
+            balance -= amount;
+            System.out.println("Withdrawal Successful! New balance: " + balance);
+        } else {
+            System.out.println("Insufficient balance or invalid amount.");
+        }
+    }
+
+    public void viewAccountInfo() {
         System.out.println("Account Number: " + accountNumber);
-        System.out.println("Account Holder: " + accountHolderName);
+        System.out.println("Account Holder: " + holderName);
         System.out.println("Balance: " + balance);
     }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getPassword() {
-        return password;
-    }
 }
-

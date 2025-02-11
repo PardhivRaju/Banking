@@ -31,7 +31,7 @@ public class Bank {
         if (Login.isLoggedIn) {
             System.out.println("\n-- All Accounts --");
             for (Account account : accounts.values()) {
-                account.displayAccountInfo();
+                account.viewAccountInfo();
             }
         } else {
             System.out.println("Only admin can view all accounts.");
