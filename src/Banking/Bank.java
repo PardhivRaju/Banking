@@ -18,10 +18,26 @@ public class Bank {
         return accounts.get(accountNumber);
     }
 
-    public void displayAllAccounts() {
+    public Account getAccountByUsername(String username) {
         for (Account account : accounts.values()) {
-            account.displayAccountInfo();
+            if (account.getUsername().equals(username)) {
+                return account;
+            }
+        }
+        return null;
+    }
+
+    public void displayAllAccounts() {
+        if (Login.isLoggedIn) {
+            System.out.println("\n-- All Accounts --");
+            for (Account account : accounts.values()) {
+                account.displayAccountInfo();
+            }
+        } else {
+            System.out.println("Only admin can view all accounts.");
         }
     }
 }
+
+
 
